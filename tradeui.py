@@ -3,21 +3,30 @@ from tkinter import ttk
 import ccxt
 
 def execute_trade():
-    exchange = ccxt.binance({
-        'rateLimit': 3000,
-        'enableRateLimit': True,
-        'apiKey': api_key_entry.get(),
-        'secret': api_secret_entry.get()
-    })
-    symbol = trading_pair_entry.get()
-    amount = float(amount_entry.get())
-    price = float(price_entry.get())
-    order = exchange.create_order(symbol, 'limit', trade_type.get(), amount, price)
-    result_label.configure(text=f"Order ID: {order['id']}\nOrder Status: {order['status']}")
+    try:
+        exchange = ccxt.binance({
+            'rateLimit': 3000,
+            'enableRateLimit': True,
+            'apiKey': api_key_entry.get(),
+            'secret': api_secret_entry.get()
+        })
+        symbol = trading_pair_entry.get()
+        amount = float(amount_entry.get())
+        price = float(price_entry.get())
+        order_type = order_type.get()
+
+        # Execute the trade
+        order = exchange.create_order(symbol, order_type, trade_type.get(), amount, price)
+
+        # Display the trade details
+        result_label.configure(text=f"Order ID: {order['id']}\nStatus: {order['status']}\nAmount: {order['amount']}\nPrice: {order['price']}\nFees: {order['fees']}")
+    except Exception as e:
+        result_label.configure(text=f"Error: {str(e)}")
 
 root = tk.Tk()
 root.title("Trading Bot")
 
+# API key and secret inputs
 api_key_label = ttk.Label(root, text="API Key:")
 api_key_label.grid(column=0, row=0)
 api_key_entry = ttk.Entry(root)
@@ -28,6 +37,7 @@ api_secret_label.grid(column=0, row=1)
 api_secret_entry = ttk.Entry(root, show="*")
 api_secret_entry.grid(column=1, row=1)
 
+# Trading pair, amount, and price inputs
 trading_pair_label = ttk.Label(root, text="Trading Pair (e.g BTC/USDT):")
 trading_pair_label.grid(column=0, row=2)
 trading_pair_entry = ttk.Entry(root)
